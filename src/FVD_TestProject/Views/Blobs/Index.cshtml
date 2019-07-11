@@ -1,0 +1,45 @@
+﻿@model IEnumerable<string>
+
+@{
+    ViewData["Title"] = "Blob Page";
+}
+
+<form method="post" enctype="multipart/form-data" asp-controller="Blobs" asp-action="UploadFiles">
+    <div class="form-group">
+        <div class="col-md-10">
+            <p>Upload one or more files using this form:</p>
+            <input type="file" accept=".jpg,.png" name="files" multiple>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            <input type="submit" class="btn btn-info btn-sm" value="Upload">
+        </div>
+    </div>
+</form>
+
+<form method="post" enctype="multipart/form-data" asp-controller="Blobs" asp-action="IdentityFace">
+    <div class="form-group">
+        <div class="col-md-10">
+            <p>Identity file:</p>
+            <input type="file" accept=".jpg,.png" name="file" multiple>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            <input type="submit" class="btn btn-info btn-sm" value="Upload">
+        </div>
+    </div>
+</form>
+
+<!-- Images -->
+<div class="row">
+    @foreach (var imageUrl in Model)
+    {
+        <div class="col-3 p-3">
+            <div class="text-center">
+                <img src="@Html.Raw(imageUrl)" width="200" height="200" class="rounded">
+            </div>
+        </div>
+    }
+</div>
