@@ -47,7 +47,7 @@ namespace VDS.UMS
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<UMSContext>(options =>
-                                       options.UseSqlServer(Configuration.GetConnectionString("SecurityDBConnection")));
+                                       options.UseSqlServer(Configuration.GetConnectionString("UMSDbConnection")));
 
             CreateIdentityIfNotCreated(services);
 
