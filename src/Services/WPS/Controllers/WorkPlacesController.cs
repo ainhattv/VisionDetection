@@ -28,7 +28,7 @@ namespace VDS.WPS.Controllers
         [HttpGet("{userid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<WorkPlaceResponseModel>> Get(Guid userid)
+        public async Task<WorkPlaceResponseModel> Get(Guid userid)
         {
             _logger.LogInformation($"Start get WorkPlace userid: {0}", userid);
             return await _workPlaceService.GetWorkPlaceByUserId(userid);

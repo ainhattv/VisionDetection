@@ -6,22 +6,24 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using VDS.WPS.Interfaces;
-using VDS.WPS.Logging;
-using VDS.WPS.Data;
-using AutoMapper;
+using VDS.BlobService.Settings;
 using Swashbuckle.AspNetCore.Swagger;
-using VDS.WPS.Common;
-using VDS.WPS.Services;
-using VDS.WPS.Extensions;
-using VDS.WPS.Settings;
+using VDS.BlobService.Common;
+using AutoMapper;
+using VDS.BlobService.Extensions;
+using Microsoft.EntityFrameworkCore;
+using VDS.BlobService.Data;
+using VDS.BlobService.Adapters;
+using VDS.BlobService.Interfaces;
+using VDS.BlobService.Logging;
+using VDS.BlobService.Services;
+using BlobService.ServiceBus;
 
-namespace VDS.WPS
+namespace VDS.BlobService
 {
     public class Startup
     {
@@ -36,30 +38,32 @@ namespace VDS.WPS
         [Obsolete]
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<WPSContext>(options =>
-                                       options.UseSqlServer(Configuration.GetConnectionString("WPSDbConnection")));
+            services.AddDbContext<BlobContext>(options =>
+                                      options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
+            services.Configure<BlobSettings>(Configuration.GetSection("BlobSetings"));
             services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
+
+            services.AddTransient<IBlobAdapter, BlobAdapter>();
+            services.AddTransient<IContainerService, ContainerService>();
+            services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
+            services.AddSingleton<IServiceBusConsumer, ServiceBusConsumer>();
 
             // Add AutoMapper
             services.AddAutoMapper();
-
-            services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
-            services.AddTransient<IWorkPlaceService, WorkPlaceService>();
-            services.AddSingleton<IServiceBusService, ServiceBusService>();
-
-            services.AddMvcCore(options =>
-            {
-                options.Filters.Add(typeof(ValidateModelFilter));
-            });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
+
+            services.AddMvcCore(options =>
+            {
+                options.Filters.Add(typeof(ValidateModelFilter));
+            });
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,14 +77,14 @@ namespace VDS.WPS
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
-            app.ConfigureExceptionHandler();
-
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "UPS API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blob API V1");
             });
+
+            app.ConfigureExceptionHandler();
 
             if (env.IsDevelopment())
             {
@@ -92,8 +96,17 @@ namespace VDS.WPS
                 app.UseHsts();
             }
 
+            // Register ServiceBus Receiver
+            RegisterBlobReceiver(app);
+
             app.UseHttpsRedirection();
             app.UseMvc();
+        }
+
+        private void RegisterBlobReceiver(IApplicationBuilder app)
+        {
+            var bus = app.ApplicationServices.GetService<IServiceBusConsumer>();
+            bus.RegisterOnMessageHandlerAndReceiveMessages();
         }
     }
 }

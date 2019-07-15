@@ -11,11 +11,17 @@ using VDS.WPS.Models.Response;
 using System.Linq;
 using System.Collections.Generic;
 using VDS.WPS.Models.Request;
+using VDS.WPS.Common;
+using Microsoft.Azure.ServiceBus;
+using Newtonsoft.Json;
+using System.Text;
+using VDS.WPS.Models.ServiceBusModels;
 
 namespace VDS.WPS.Services
 {
     public class WorkPlaceService : IWorkPlaceService
     {
+        private readonly IServiceBusService _serviceBus;
         private readonly LoggerAdapter<WorkPlaceService> _logger;
         private readonly WPSContext _context;
         private readonly IMapper _mapper;
@@ -23,12 +29,14 @@ namespace VDS.WPS.Services
         public WorkPlaceService(
             LoggerAdapter<WorkPlaceService> logger,
             WPSContext context,
-            IMapper mapper
+            IMapper mapper,
+            IServiceBusService serviceBus
         )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _serviceBus = serviceBus ?? throw new ArgumentNullException(nameof(serviceBus));
         }
 
         public async Task<WorkPlaceResponseModel> GetWorkPlaceByUserId(Guid userId)
@@ -60,6 +68,21 @@ namespace VDS.WPS.Services
             };
 
             await _context.AddAsync(model);
+
+            Message message = new Message();
+
+            BaseServiceBusRequestModel<Guid> busModel = new BaseServiceBusRequestModel<Guid>()
+            {
+                Id = 1,
+                Body = model.Id
+            };
+
+            string messageBody = JsonConvert.SerializeObject(busModel);
+            message.Body = Encoding.UTF8.GetBytes(messageBody);
+
+            // Create Blob Container
+            await _serviceBus.SendMessageAsync(Queues.WorkPlace_To_Blob, message);
+
             await _context.SaveChangesAsync();
         }
 
