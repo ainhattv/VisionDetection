@@ -6,7 +6,11 @@ import {
     NbLayoutModule,
     NbIconModule,
     NbSearchModule,
-    NbActionsModule
+    NbActionsModule,
+    NbButtonModule,
+    NbCardModule,
+    NbInputModule,
+    NbToastrModule
 } from '@nebular/theme';
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { HeaderComponent } from './components/header/header.component';
@@ -19,7 +23,11 @@ import { HeaderComponent } from './components/header/header.component';
         NbIconModule,
         NbEvaIconsModule,
         NbSearchModule,
-        NbActionsModule
+        NbActionsModule,
+        NbButtonModule,
+        NbCardModule,
+        NbInputModule,
+        NbToastrModule
     ],
     providers: [],
     exports: [
@@ -30,7 +38,11 @@ import { HeaderComponent } from './components/header/header.component';
         NbEvaIconsModule,
         HeaderComponent,
         NbSearchModule,
-        NbActionsModule
+        NbActionsModule,
+        NbButtonModule,
+        NbCardModule,
+        NbInputModule,
+        NbToastrModule
     ],
     declarations: [HeaderComponent]
 })

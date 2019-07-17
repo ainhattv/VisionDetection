@@ -1,1 +1,31 @@
-<p>index works!</p>
+<nb-card>
+    <nb-card-body>
+        <div class="row">
+            <div class="col-8">
+                <input (change)="onFilesChange($event)" type="file" accept="image/*" multiple>
+                <button [disabled]="!(this.inputFiles && this.inputFiles.length > 0)" nbButton outline
+                    status="primary">Upload Images</button>
+            </div>
+            <div class="col-4 text-right">
+                <button (click)="deleteSubmit()" [disabled]="btnDelete" nbButton outline status="danger">Delete
+                    Images</button>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card>
+    <nb-card-header>Your Images</nb-card-header>
+    <nb-card-body>
+        <div class="row">
+            <div *ngFor="let item of uploadedFiles" class="col-3">
+                <div class="text-center pt-2">
+                    <img (mouseenter)="item.highlight = true" (mouseleave)="item.highlight = false" [src]="item.url"
+                        class="rounded mx-auto" (click)="item.selected = !item.selected; selectedChange()"
+                        [ngClass]="{'shadow-lg p-1 mb-1 bg-danger rounded': (item.highlight && item.highlight == true) || (item.selected && item.selected == true)}"
+                        height="100%" width="100%">
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
