@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using VDS.WPS.Controllers;
 using VDS.WPS.Data;
 using VDS.WPS.Interfaces;
-using VDS.WPS.Logging;
 using AutoMapper;
 using VDS.WPS.Data.Entities;
 using VDS.WPS.Models.Response;
@@ -15,28 +14,25 @@ using VDS.WPS.Common;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 using System.Text;
-using VDS.WPS.Models.ServiceBusModels;
+using VDS.Logging;
 
 namespace VDS.WPS.Services
 {
     public class WorkPlaceService : IWorkPlaceService
     {
-        private readonly IServiceBusService _serviceBus;
-        private readonly LoggerAdapter<WorkPlaceService> _logger;
+        private readonly IAppLogger<WorkPlaceService> _logger;
         private readonly WPSContext _context;
         private readonly IMapper _mapper;
 
         public WorkPlaceService(
-            LoggerAdapter<WorkPlaceService> logger,
+            IAppLogger<WorkPlaceService> logger,
             WPSContext context,
-            IMapper mapper,
-            IServiceBusService serviceBus
+            IMapper mapper
         )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _serviceBus = serviceBus ?? throw new ArgumentNullException(nameof(serviceBus));
         }
 
         public async Task<WorkPlaceResponseModel> GetWorkPlaceByUserId(Guid userId)
@@ -68,20 +64,6 @@ namespace VDS.WPS.Services
             };
 
             await _context.AddAsync(model);
-
-            Message message = new Message();
-
-            BaseServiceBusRequestModel<Guid> busModel = new BaseServiceBusRequestModel<Guid>()
-            {
-                Id = 1,
-                Body = model.Id
-            };
-
-            string messageBody = JsonConvert.SerializeObject(busModel);
-            message.Body = Encoding.UTF8.GetBytes(messageBody);
-
-            // Create Blob Container
-            await _serviceBus.SendMessageAsync(Queues.WorkPlace_To_Blob, message);
 
             await _context.SaveChangesAsync();
         }

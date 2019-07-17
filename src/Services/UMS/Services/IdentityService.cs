@@ -14,7 +14,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using VDS.UMS.Logging;
+using VDS.Logging;
 
 namespace VDS.UMS.Services
 {
@@ -25,7 +25,7 @@ namespace VDS.UMS.Services
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly AppSettings _appSettings;
-        private readonly LoggerAdapter<IdentityService> _logger;
+        private readonly IAppLogger<IdentityService> _logger;
         private readonly ClientHostName _clientHostName;
 
         public IdentityService(UserManager<ApplicationUser> userManager,
@@ -33,7 +33,7 @@ namespace VDS.UMS.Services
             IMapper mapper,
             IEmailService emailService,
             IOptions<AppSettings> appSettings,
-            LoggerAdapter<IdentityService> logger,
+            IAppLogger<IdentityService> logger,
             IOptions<ClientHostName> clientHostName)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));

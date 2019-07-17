@@ -1,0 +1,16 @@
+{
+    "sqltools.connections": [
+        {
+            "connectString": "Data Source=(localdb)\\\\MSSQLLocalDB;Initial Catalog=Vision.UMS;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False",
+            "connectionTimeout": 30,
+            "dialect": "MSSQL",
+            "name": "localDb"
+        },
+        {
+            "connectString": "Data Source=(localdb)\\\\MSSQLLocalDB;Initial Catalog=Vision.UMS;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False",
+            "connectionTimeout": 30,
+            "dialect": "MSSQL",
+            "name": "localdb"
+        }
+    ]
+}

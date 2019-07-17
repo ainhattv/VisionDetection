@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using VDS.UMS.Interfaces;
 using VDS.UMS.Entities.RequestModels;
 using VDS.UMS.Entities.ResponseModels;
-using VDS.UMS.Logging;
+using VDS.Logging;
 
 namespace VDS.UMS.Controllers
 {
@@ -16,11 +16,11 @@ namespace VDS.UMS.Controllers
     public class IdentityController : ControllerBase
     {
         private readonly IIdentityService _identityService;
-        private readonly LoggerAdapter<IdentityController> _logger;
+        private readonly IAppLogger<IdentityController> _logger;
 
         public IdentityController(
             IIdentityService identityService,
-            LoggerAdapter<IdentityController> logger)
+            IAppLogger<IdentityController> logger)
         {
             _identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

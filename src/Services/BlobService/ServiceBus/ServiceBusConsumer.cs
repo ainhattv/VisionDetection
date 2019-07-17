@@ -4,24 +4,22 @@ using System.Threading.Tasks;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using VDS.BlobService.Logging;
 using VDS.BlobService.Settings;
 
 namespace BlobService.ServiceBus
 {
     public class ServiceBusConsumer : IServiceBusConsumer
     {
-        private readonly LoggerAdapter<ServiceBusConsumer> _logger;
+        // private readonly IAppLogger<ServiceBusConsumer> _logger;
         private readonly QueueClient _queueClient;
         private readonly IOptions<ServiceBusSettings> _serviceBusSettings;
 
         public ServiceBusConsumer(
-            LoggerAdapter<ServiceBusConsumer> logger,
-            QueueClient queueClient,
+            // IAppLogger<ServiceBusConsumer> logger,
             IOptions<ServiceBusSettings> serviceBusSettings
         )
         {
-            _logger = logger;
+            // _logger = logger;
             _serviceBusSettings = serviceBusSettings ?? throw new System.ArgumentNullException(nameof(serviceBusSettings));
 
             _queueClient = new QueueClient(_serviceBusSettings.Value.ConnectionString, "wp2blob");
@@ -47,7 +45,7 @@ namespace BlobService.ServiceBus
 
         private Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
         {
-            _logger.LogError("Message handler encountered an exception");
+            // _logger.LogError("Message handler encountered an exception");
             var context = exceptionReceivedEventArgs.ExceptionReceivedContext;
 
             // _logger.LogDebug($"- Endpoint: {context.Endpoint}");

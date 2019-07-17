@@ -19,9 +19,9 @@ using Microsoft.EntityFrameworkCore;
 using VDS.BlobService.Data;
 using VDS.BlobService.Adapters;
 using VDS.BlobService.Interfaces;
-using VDS.BlobService.Logging;
 using VDS.BlobService.Services;
 using BlobService.ServiceBus;
+using VDS.Logging;
 
 namespace VDS.BlobService
 {
@@ -47,7 +47,7 @@ namespace VDS.BlobService
             services.AddTransient<IBlobAdapter, BlobAdapter>();
             services.AddTransient<IContainerService, ContainerService>();
             services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
-            services.AddSingleton<IServiceBusConsumer, ServiceBusConsumer>();
+            services.AddTransient<IServiceBusConsumer, ServiceBusConsumer>();
 
             // Add AutoMapper
             services.AddAutoMapper();

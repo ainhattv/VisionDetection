@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VDS.BlobService.Interfaces;
-using VDS.BlobService.Logging;
+using VDS.Logging;
 
 namespace BlobService.Controllers
 {
@@ -13,11 +13,11 @@ namespace BlobService.Controllers
     public class BlobsController : ControllerBase
     {
         private readonly IContainerService _containerService;
-        private readonly LoggerAdapter<BlobsController> _logger;
+        private readonly IAppLogger<BlobsController> _logger;
 
         public BlobsController(
             IContainerService containerService,
-            LoggerAdapter<BlobsController> logger)
+            IAppLogger<BlobsController> logger)
         {
             _containerService = containerService ?? throw new System.ArgumentNullException(nameof(containerService));
             _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));

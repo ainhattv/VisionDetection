@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VDS.WPS.Interfaces;
-using VDS.WPS.Logging;
 using VDS.WPS.Data;
 using AutoMapper;
 using Swashbuckle.AspNetCore.Swagger;
@@ -20,6 +19,7 @@ using VDS.WPS.Common;
 using VDS.WPS.Services;
 using VDS.WPS.Extensions;
 using VDS.WPS.Settings;
+using VDS.Logging;
 
 namespace VDS.WPS
 {
@@ -48,7 +48,6 @@ namespace VDS.WPS
 
             services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
             services.AddTransient<IWorkPlaceService, WorkPlaceService>();
-            services.AddSingleton<IServiceBusService, ServiceBusService>();
 
             services.AddMvcCore(options =>
             {

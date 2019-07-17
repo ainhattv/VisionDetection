@@ -23,13 +23,13 @@ using Microsoft.IdentityModel.Tokens;
 using VDS.UMS.Common;
 using VDS.UMS.Data;
 using VDS.UMS.Interfaces;
-using VDS.UMS.Logging;
 using VDS.UMS.Entities;
 using VDS.UMS.Services;
 using VDS.UMS.Settings;
 using Swashbuckle.AspNetCore.Swagger;
 using UMS.Extensions;
 using UMS.Common;
+using VDS.Logging;
 
 namespace VDS.UMS
 {

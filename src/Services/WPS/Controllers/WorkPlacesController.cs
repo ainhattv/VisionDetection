@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using VDS.Logging;
 using VDS.WPS.Interfaces;
-using VDS.WPS.Logging;
 using VDS.WPS.Models.Request;
 using VDS.WPS.Models.Response;
 
