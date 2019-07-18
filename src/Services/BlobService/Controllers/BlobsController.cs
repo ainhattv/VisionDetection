@@ -26,10 +26,10 @@ namespace BlobService.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IEnumerable<Uri>> Get([FromQuery]Guid wpId, [FromQuery]Guid userId)
+        public async Task<ActionResult<IEnumerable<Uri>>> Get([FromQuery]Guid wpId, [FromQuery]Guid userId)
         {
             _logger.LogInformation($"Start get blobs userid: {userId} && wpId: {wpId}");
-            return await _blobAdapter.GetBlobs(wpId, userId);
+            return Ok(await _blobAdapter.GetBlobs(wpId, userId));
         }
 
         [HttpPost("Upload")]

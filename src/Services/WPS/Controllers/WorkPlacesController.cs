@@ -42,10 +42,10 @@ namespace VDS.WPS.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async void Post([FromBody] WorkPlaceRequestModel requestModel)
+        public async Task<IActionResult> Post([FromBody] WorkPlaceRequestModel requestModel)
         {
             _logger.LogInformation($"Start Create WorkPlace requestModel: {0}", requestModel);
-            var workplace = _workPlaceService.CreateWorkPlace(requestModel);
+            var workplace = await _workPlaceService.CreateWorkPlace(requestModel);
 
             WorkPlaceCreatedIntegrationEvent @event = new WorkPlaceCreatedIntegrationEvent(workplace.Id, workplace.AuthorId);
 
@@ -59,24 +59,28 @@ namespace VDS.WPS.Controllers
             {
                 _logger.LogError("ERROR Publishing integration event: {IntegrationEventId} -- errorMessage: {message} ", @event.Id, ex.Message);
             }
+
+            return Ok();
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async void Put(Guid id, [FromBody] WorkPlaceRequestModel requestModel)
+        public async Task<IActionResult> Put(Guid id, [FromBody] WorkPlaceRequestModel requestModel)
         {
             _logger.LogInformation($"Start Update WorkPlace requestModel: {0}", requestModel);
             await _workPlaceService.UpdateWorkPlace(id, requestModel);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async void Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             _logger.LogInformation($"Start Delete WorkPlace id: {0}", id);
             await _workPlaceService.DeleteWorkPlace(id);
+            return Ok();
         }
     }
 }

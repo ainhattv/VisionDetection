@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  authApi: 'https://localhost:5001/',
+  authApi: 'https://localhost:5002/',
+  wpsApi: 'https://localhost:5001/'
 };
 
 /*
