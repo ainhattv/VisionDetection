@@ -3,3 +3,4 @@ obj
 /src/FVD_TestProject/appsettings.json
 /src/Services/BlobService/appsettings.Development.json
 /src/Services/WPS/appsettings.json
+/src/Services/UMS/.vscode
