@@ -1,17 +1,17 @@
-﻿namespace VDS.Core.EventBusServiceBus
-{
-    using Autofac;
-    using Microsoft.Azure.ServiceBus;
-    using VDS.Core.EventBus;
-    using VDS.Core.EventBus.Abstractions;
-    using VDS.Core.EventBus.Events;
-    using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-    using System;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿using Autofac;
+using Microsoft.Azure.ServiceBus;
+using VDS.Core.EventBus;
+using VDS.Core.EventBus.Abstractions;
+using VDS.Core.EventBus.Events;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
+namespace VDS.Core.EventBusServiceBus
+{
     public class EventBusServiceBus : IEventBus
     {
         private readonly IServiceBusPersisterConnection _serviceBusPersisterConnection;

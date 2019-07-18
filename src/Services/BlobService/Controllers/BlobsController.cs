@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using VDS.BlobService.Interfaces;
+using VDS.BlobService.Adapters;
 using VDS.Logging;
 
 namespace BlobService.Controllers
@@ -12,14 +12,14 @@ namespace BlobService.Controllers
     [ApiController]
     public class BlobsController : ControllerBase
     {
-        private readonly IContainerService _containerService;
+        private readonly IBlobAdapter _blobAdapter;
         private readonly IAppLogger<BlobsController> _logger;
 
         public BlobsController(
-            IContainerService containerService,
+            IBlobAdapter blobAdapter,
             IAppLogger<BlobsController> logger)
         {
-            _containerService = containerService ?? throw new System.ArgumentNullException(nameof(containerService));
+            _blobAdapter = blobAdapter ?? throw new ArgumentNullException(nameof(blobAdapter));
             _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
         }
 
@@ -29,7 +29,7 @@ namespace BlobService.Controllers
         public async Task<IEnumerable<Uri>> Get([FromQuery]Guid wpId, [FromQuery]Guid userId)
         {
             _logger.LogInformation($"Start get blobs userid: {userId} && wpId: {wpId}");
-            return await _containerService.GetBlobs(wpId, userId);
+            return await _blobAdapter.GetBlobs(wpId, userId);
         }
 
         [HttpPost("Upload")]
@@ -38,7 +38,7 @@ namespace BlobService.Controllers
         public async Task<Uri> Post([FromQuery]Guid wpId, [FromQuery]Guid userId, [FromBody]IFormFile file)
         {
             _logger.LogInformation($"Start upload blob userid: {wpId} && userId: {userId}");
-            return await _containerService.UploadContainerBlob(wpId, userId, file);
+            return await _blobAdapter.UploadContainerBlob(wpId, userId, file);
         }
     }
 }

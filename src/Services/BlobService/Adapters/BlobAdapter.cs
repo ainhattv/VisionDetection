@@ -52,6 +52,13 @@ namespace VDS.BlobService.Adapters
             return containerId;
         }
 
+        public async Task CreateContainer(Guid containerId)
+        {
+            CloudBlobContainer container = _cloudBlobClient.GetContainerReference(containerId.ToString());
+
+            await container.CreateIfNotExistsAsync();
+        }
+
         public async Task DeleteContainer(Guid containerId)
         {
             CloudBlobContainer container = _cloudBlobClient.GetContainerReference(containerId.ToString());

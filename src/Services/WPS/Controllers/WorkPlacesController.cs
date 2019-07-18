@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using VDS.Core.EventBus.Abstractions;
+using VDS.IntegrationEvents.Events;
 using VDS.Logging;
 using VDS.WPS.Interfaces;
 using VDS.WPS.Models.Request;
@@ -14,15 +16,18 @@ namespace VDS.WPS.Controllers
     [ApiController]
     public class WorkPlacesController : ControllerBase
     {
-        private readonly LoggerAdapter<WorkPlacesController> _logger;
+        private readonly IAppLogger<WorkPlacesController> _logger;
         private readonly IWorkPlaceService _workPlaceService;
+        private readonly IEventBus _eventBus;
 
         public WorkPlacesController(
-            LoggerAdapter<WorkPlacesController> logger,
-            IWorkPlaceService workPlaceService)
+            IAppLogger<WorkPlacesController> logger,
+            IWorkPlaceService workPlaceService,
+            IEventBus eventBus)
         {
             _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             _workPlaceService = workPlaceService ?? throw new System.ArgumentNullException(nameof(workPlaceService));
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         }
 
         [HttpGet("{userid}")]
@@ -40,7 +45,20 @@ namespace VDS.WPS.Controllers
         public async void Post([FromBody] WorkPlaceRequestModel requestModel)
         {
             _logger.LogInformation($"Start Create WorkPlace requestModel: {0}", requestModel);
-            await _workPlaceService.CreateWorkPlace(requestModel);
+            var workplace = _workPlaceService.CreateWorkPlace(requestModel);
+
+            WorkPlaceCreatedIntegrationEvent @event = new WorkPlaceCreatedIntegrationEvent(workplace.Id, workplace.AuthorId);
+
+            try
+            {
+                _logger.LogInformation("----- Publishing integration event: {IntegrationEventId} - ({@IntegrationEvent})", @event.Id, @event);
+
+                _eventBus.Publish(@event);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ERROR Publishing integration event: {IntegrationEventId} -- errorMessage: {message} ", @event.Id, ex.Message);
+            }
         }
 
         [HttpPut("{id}")]

@@ -16,12 +16,16 @@ using VDS.BlobService.Common;
 using AutoMapper;
 using VDS.BlobService.Extensions;
 using Microsoft.EntityFrameworkCore;
-using VDS.BlobService.Data;
 using VDS.BlobService.Adapters;
-using VDS.BlobService.Interfaces;
-using VDS.BlobService.Services;
-using BlobService.ServiceBus;
 using VDS.Logging;
+using VDS.Core.EventBusServiceBus;
+using Microsoft.Azure.ServiceBus;
+using VDS.Core.EventBus.Abstractions;
+using VDS.Core.EventBus;
+using VDS.BlobService.IntegrationEvents.Eventhandling;
+using VDS.IntegrationEvents.Events;
+using Autofac.Extensions.DependencyInjection;
+using Autofac;
 
 namespace VDS.BlobService
 {
@@ -36,21 +40,33 @@ namespace VDS.BlobService
 
         // This method gets called by the runtime. Use this method to add services to the container.
         [Obsolete]
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<BlobContext>(options =>
-                                      options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.Configure<BlobSettings>(Configuration.GetSection("BlobSetings"));
-            services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
 
             services.AddTransient<IBlobAdapter, BlobAdapter>();
-            services.AddTransient<IContainerService, ContainerService>();
             services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
-            services.AddTransient<IServiceBusConsumer, ServiceBusConsumer>();
 
             // Add AutoMapper
             services.AddAutoMapper();
+
+            services.AddMvcCore(options =>
+            {
+                options.Filters.Add(typeof(ValidateModelFilter));
+            });
+
+            services.AddSingleton<IServiceBusPersisterConnection>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<DefaultServiceBusPersisterConnection>>();
+
+                var serviceBusConnectionString = Configuration["EventBusConnection"];
+                var serviceBusConnection = new ServiceBusConnectionStringBuilder(serviceBusConnectionString);
+
+                return new DefaultServiceBusPersisterConnection(serviceBusConnection, logger);
+            });
+            RegisterEventBus(services);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -58,12 +74,12 @@ namespace VDS.BlobService
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
-            services.AddMvcCore(options =>
-            {
-                options.Filters.Add(typeof(ValidateModelFilter));
-            });
+            services.AddOptions();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            var container = new ContainerBuilder();
+            container.Populate(services);
+
+            return new AutofacServiceProvider(container.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -96,17 +112,37 @@ namespace VDS.BlobService
                 app.UseHsts();
             }
 
-            // Register ServiceBus Receiver
-            RegisterBlobReceiver(app);
+            ConfigureEventBus(app);
 
             app.UseHttpsRedirection();
             app.UseMvc();
         }
 
-        private void RegisterBlobReceiver(IApplicationBuilder app)
+        private void RegisterEventBus(IServiceCollection services)
         {
-            var bus = app.ApplicationServices.GetService<IServiceBusConsumer>();
-            bus.RegisterOnMessageHandlerAndReceiveMessages();
+            var subscriptionClientName = Configuration["SubscriptionClientName"];
+
+            services.AddSingleton<IEventBus, EventBusServiceBus>(sp =>
+            {
+                var serviceBusPersisterConnection = sp.GetRequiredService<IServiceBusPersisterConnection>();
+                var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
+                var logger = sp.GetRequiredService<ILogger<EventBusServiceBus>>();
+                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+
+                return new EventBusServiceBus(serviceBusPersisterConnection, logger,
+                    eventBusSubcriptionsManager, subscriptionClientName, iLifetimeScope);
+            });
+
+            services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+
+            services.AddTransient<WorkPlaceCreatedIntegrationEventHandler>();
+        }
+
+        private void ConfigureEventBus(IApplicationBuilder app)
+        {
+            var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+
+            eventBus.Subscribe<WorkPlaceCreatedIntegrationEvent, WorkPlaceCreatedIntegrationEventHandler>();
         }
     }
 }

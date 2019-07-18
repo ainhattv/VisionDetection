@@ -20,6 +20,12 @@ using VDS.WPS.Services;
 using VDS.WPS.Extensions;
 using VDS.WPS.Settings;
 using VDS.Logging;
+using Microsoft.Azure.ServiceBus;
+using VDS.Core.EventBus.Abstractions;
+using Autofac;
+using VDS.Core.EventBus;
+using VDS.Core.EventBusServiceBus;
+using Autofac.Extensions.DependencyInjection;
 
 namespace VDS.WPS
 {
@@ -34,14 +40,12 @@ namespace VDS.WPS
 
         // This method gets called by the runtime. Use this method to add services to the container.
         [Obsolete]
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<WPSContext>(options =>
                                        options.UseSqlServer(Configuration.GetConnectionString("WPSDbConnection")));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
 
             // Add AutoMapper
             services.AddAutoMapper();
@@ -54,11 +58,27 @@ namespace VDS.WPS
                 options.Filters.Add(typeof(ValidateModelFilter));
             });
 
+            services.AddSingleton<IServiceBusPersisterConnection>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<DefaultServiceBusPersisterConnection>>();
+
+                var serviceBusConnectionString = Configuration["EventBusConnection"];
+                var serviceBusConnection = new ServiceBusConnectionStringBuilder(serviceBusConnectionString);
+
+                return new DefaultServiceBusPersisterConnection(serviceBusConnection, logger);
+            });
+            RegisterEventBus(services);
+
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
+
+            var container = new ContainerBuilder();
+            container.Populate(services);
+
+            return new AutofacServiceProvider(container.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,6 +113,26 @@ namespace VDS.WPS
 
             app.UseHttpsRedirection();
             app.UseMvc();
+        }
+
+        private void RegisterEventBus(IServiceCollection services)
+        {
+            var subscriptionClientName = Configuration["SubscriptionClientName"];
+
+            services.AddSingleton<IEventBus, EventBusServiceBus>(sp =>
+            {
+                var serviceBusPersisterConnection = sp.GetRequiredService<IServiceBusPersisterConnection>();
+                var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
+                var logger = sp.GetRequiredService<ILogger<EventBusServiceBus>>();
+                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+
+                return new EventBusServiceBus(serviceBusPersisterConnection, logger,
+                    eventBusSubcriptionsManager, subscriptionClientName, iLifetimeScope);
+            });
+
+            services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+
+            //services.AddTransient<WorkPlaceCreatedIntegrationEventHandler>();
         }
     }
 }

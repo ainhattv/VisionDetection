@@ -47,10 +47,33 @@ namespace VDS.WPS.Services
             return _mapper.Map<IEnumerable<WorkPlaceResponseModel>>(workPlaces);
         }
 
-        public async Task CreateWorkPlace(WorkPlaceRequestModel workPlace)
+        //public async Task<WorkPlaceResponseModel> CreateWorkPlace(WorkPlaceRequestModel workPlace)
+        //{
+        //    var valid = await _context.WorkPlaces.SingleOrDefaultAsync(x => x.AuthorId == workPlace.AuthorId || x.AuthorEmail == workPlace.AuthorEmail);
+        //    if (valid != null) return null;
+
+        //    WorkPlace model = new WorkPlace()
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        CreatedDate = DateTime.UtcNow,
+        //        Name = workPlace.Name,
+        //        AuthorId = workPlace.AuthorId,
+        //        AuthorEmail = workPlace.AuthorEmail,
+        //        AuthorName = workPlace.AuthorName,
+        //        IsActive = true
+        //    };
+
+        //    await _context.AddAsync(model);
+
+        //    await _context.SaveChangesAsync();
+
+        //    return _mapper.Map<WorkPlaceResponseModel>(model);
+        //}
+
+        public WorkPlaceResponseModel CreateWorkPlace(WorkPlaceRequestModel workPlace)
         {
-            bool valid = await _context.WorkPlaces.AnyAsync(x => x.AuthorId == workPlace.AuthorId || x.AuthorEmail == workPlace.AuthorEmail);
-            if (valid) throw new ArgumentException(nameof(workPlace));
+            //var valid = _context.WorkPlaces.SingleOrDefault(x => x.AuthorId == workPlace.AuthorId || x.AuthorEmail == workPlace.AuthorEmail);
+            //if (valid != null) return null;
 
             WorkPlace model = new WorkPlace()
             {
@@ -63,9 +86,11 @@ namespace VDS.WPS.Services
                 IsActive = true
             };
 
-            await _context.AddAsync(model);
+             _context.Add(model);
 
-            await _context.SaveChangesAsync();
+             _context.SaveChanges();
+
+            return _mapper.Map<WorkPlaceResponseModel>(model);
         }
 
         public async Task UpdateWorkPlace(Guid id, WorkPlaceRequestModel workPlace)

@@ -13,12 +13,6 @@ namespace VDS.IntegrationEvents.Events
             WorkPlaceId = workPlaceId;
         }
 
-        public WorkPlaceCreatedIntegrationEvent(string workPlaceId, string ownerId)
-        {
-            OwnerId = Guid.Parse(ownerId);
-            WorkPlaceId = Guid.Parse(workPlaceId);
-        }
-
         public Guid WorkPlaceId { get; private set; }
 
         public Guid OwnerId { get; private set; }

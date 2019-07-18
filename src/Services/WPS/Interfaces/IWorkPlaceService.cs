@@ -9,7 +9,8 @@ namespace VDS.WPS.Interfaces
     public interface IWorkPlaceService
     {
         Task<WorkPlaceResponseModel> GetWorkPlaceByUserId(Guid userId);
-        Task CreateWorkPlace(WorkPlaceRequestModel workPlace);
+        //Task<WorkPlaceResponseModel> CreateWorkPlace(WorkPlaceRequestModel workPlace);
+        WorkPlaceResponseModel CreateWorkPlace(WorkPlaceRequestModel workPlace);
         Task UpdateWorkPlace(Guid id, WorkPlaceRequestModel workPlace);
         Task DeleteWorkPlace(Guid id);
     }
