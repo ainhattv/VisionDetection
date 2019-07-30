@@ -15,6 +15,8 @@ import {
 import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { HeaderComponent } from './components/header/header.component';
 
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 @NgModule({
     imports: [
         NbSidebarModule,
@@ -27,7 +29,9 @@ import { HeaderComponent } from './components/header/header.component';
         NbButtonModule,
         NbCardModule,
         NbInputModule,
-        NbToastrModule
+        NbToastrModule,
+        FormsModule,
+        ReactiveFormsModule
     ],
     providers: [],
     exports: [
@@ -42,7 +46,9 @@ import { HeaderComponent } from './components/header/header.component';
         NbButtonModule,
         NbCardModule,
         NbInputModule,
-        NbToastrModule
+        NbToastrModule,
+        FormsModule,
+        ReactiveFormsModule
     ],
     declarations: [HeaderComponent]
 })

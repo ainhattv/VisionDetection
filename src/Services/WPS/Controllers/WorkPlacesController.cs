@@ -33,7 +33,7 @@ namespace VDS.WPS.Controllers
         [HttpGet("{userid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<WorkPlaceResponseModel> Get(Guid userid)
+        public async Task<ActionResult<WorkPlaceResponseModel>> Get(Guid userid)
         {
             _logger.LogInformation($"Start get WorkPlace userid: {0}", userid);
             return await _workPlaceService.GetWorkPlaceByUserId(userid);
@@ -42,7 +42,7 @@ namespace VDS.WPS.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Post([FromBody] WorkPlaceRequestModel requestModel)
+        public async Task<ActionResult> Post([FromBody] WorkPlaceRequestModel requestModel)
         {
             _logger.LogInformation($"Start Create WorkPlace requestModel: {0}", requestModel);
             var workplace = await _workPlaceService.CreateWorkPlace(requestModel);
@@ -60,13 +60,13 @@ namespace VDS.WPS.Controllers
                 _logger.LogError("ERROR Publishing integration event: {IntegrationEventId} -- errorMessage: {message} ", @event.Id, ex.Message);
             }
 
-            return Ok();
+            return Ok(workplace);
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Put(Guid id, [FromBody] WorkPlaceRequestModel requestModel)
+        public async Task<ActionResult> Put(Guid id, [FromBody] WorkPlaceRequestModel requestModel)
         {
             _logger.LogInformation($"Start Update WorkPlace requestModel: {0}", requestModel);
             await _workPlaceService.UpdateWorkPlace(id, requestModel);
@@ -76,7 +76,7 @@ namespace VDS.WPS.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
             _logger.LogInformation($"Start Delete WorkPlace id: {0}", id);
             await _workPlaceService.DeleteWorkPlace(id);

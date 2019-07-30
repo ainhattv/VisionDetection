@@ -18,7 +18,7 @@ namespace VDS.UMS.Data
             .AddJsonFile("appsettings.json")
             .Build();
 
-            var connectionString = configuration.GetConnectionString("SecurityDBConnection");
+            var connectionString = configuration.GetConnectionString("UMSDbConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<UMSContext>();
             optionsBuilder.UseSqlServer(connectionString);

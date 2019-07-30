@@ -19,7 +19,7 @@
         },
         "BlobService": {
             "commandName": "Project",
-            "launchBrowser": true,
+            "launchBrowser": false,
             "launchUrl": "swagger",
             "applicationUrl": "https://localhost:5003",
             "environmentVariables": {

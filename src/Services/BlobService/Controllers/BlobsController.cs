@@ -35,10 +35,10 @@ namespace BlobService.Controllers
         [HttpPost("Upload")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<Uri> Post([FromQuery]Guid wpId, [FromQuery]Guid userId, [FromBody]IFormFile file)
+        public async Task<ActionResult<Uri>> Post([FromQuery]Guid wpId, [FromQuery]Guid userId, [FromBody]IFormFile file)
         {
             _logger.LogInformation($"Start upload blob userid: {wpId} && userId: {userId}");
-            return await _blobAdapter.UploadContainerBlob(wpId, userId, file);
+            return Ok(await _blobAdapter.UploadContainerBlob(wpId, userId, file));
         }
     }
 }
